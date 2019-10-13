@@ -31,7 +31,6 @@ DTYPES_TAXA = {
 
 def get_sql_uri_from_cnf(my_cnf_file):
     """
-    :param mysql_config_file: Path to .my.cnf
     :param my_cnf_file: Path to .my.cnf
     :return: SQL URI for querying db using mysql_config_file params
     """
@@ -47,11 +46,12 @@ def get_sql_uri_from_cnf(my_cnf_file):
 
 
 def main():
-    zip_output = True
+    zip_output = False
     date_today = date.today().strftime("%Y-%m-%d")
     db_uri = get_sql_uri_from_cnf(FILE_SQL_CONFIG)
     print("Reading taxa table from database...")
     taxa_export_df = pd.read_sql(SQL_EXPORT_TBL, db_uri)
+    print(taxa_export_df.head())
     print("Exporting taxa table to csv...")
     taxa_export_df.to_csv(
         FILE_OUTPUT.format(date_today),
@@ -59,12 +59,12 @@ def main():
         index=False,
         quoting=csv.QUOTE_NONNUMERIC
     )
-    print(taxa_export_df.head())
 
     if zip_output:
         print("Zipping output...")
         with zipfile.ZipFile(FILE_OUTPUT_ZIPPED.format(date_today), 'w', compression=zipfile.ZIP_DEFLATED) as f:
             f.write(FILE_OUTPUT.format(date_today))
+        os.remove(FILE_OUTPUT.format(date_today))
 
     print("Done.")
 
