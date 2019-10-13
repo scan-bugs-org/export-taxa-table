@@ -1,0 +1,8 @@
+name: export-taxa-table
+dependencies:
+  - python=3
+  - pandas
+  - sqlalchemy
+  - pip
+  - pip:
+      - pymysql
