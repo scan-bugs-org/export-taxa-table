@@ -1,4 +1,5 @@
 # export-taxa-table
+### exports the taxa table, after joining with taxaenumtree to determine parenttid, from a symbiota database
 
 This requires access to a symbiota database configured in .my.cnf in the user's home directory in the following format:
 ```
@@ -15,4 +16,4 @@ installed):
     - `conda activate export-taxa-table`
 2. If you want to automatically zip the output file, which can be quite large, set `zipped_output = True` at the top of
 main() in [main.py](./main.py)
-3. `python main.py`
+3. Run `python main.py`
