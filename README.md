@@ -1,5 +1,14 @@
 # export-taxa-table
 
+This requires access to a symbiota database configured in .my.cnf in the user's home directory in the following format:
+```
+[client]
+user = ...
+password = ...
+host = ...
+database = ...
+```
+
 1. Install python dependencies (requires [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/download.html)
 installed):
     - `conda env create -f environment.yml`

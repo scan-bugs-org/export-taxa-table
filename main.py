@@ -63,8 +63,8 @@ def main():
 
     if zip_output:
         print("Zipping output...")
-        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED, 'w', compression=zipfile.ZIP_DEFLATED) as f:
-            f.write(FILE_OUTPUT)
+        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED.format(date_today), 'w', compression=zipfile.ZIP_DEFLATED) as f:
+            f.write(FILE_OUTPUT.format(date_today))
 
     print("Done.")
 
