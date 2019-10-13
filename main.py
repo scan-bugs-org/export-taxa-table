@@ -3,6 +3,7 @@ import csv
 import numpy as np
 import os
 import pandas as pd
+import zipfile
 from datetime import date
 
 
@@ -17,6 +18,7 @@ ORDER BY t.tid;
 FILE_SQL_CONFIG = os.path.join(os.environ["HOME"], ".my.cnf")
 
 FILE_OUTPUT = "{}_taxa.csv"
+FILE_OUTPUT_ZIPPED = "{}_taxa.csv.zip"
 
 DTYPES_TAXA = {
     "tid": np.int_,
@@ -45,6 +47,7 @@ def get_sql_uri_from_cnf(my_cnf_file):
 
 
 def main():
+    zip_output = True
     date_today = date.today().strftime("%Y-%m-%d")
     db_uri = get_sql_uri_from_cnf(FILE_SQL_CONFIG)
     print("Reading taxa table from database...")
@@ -57,6 +60,12 @@ def main():
         quoting=csv.QUOTE_NONNUMERIC
     )
     print(taxa_export_df.head())
+
+    if zip_output:
+        print("Zipping output...")
+        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED, 'w', compression=zipfile.ZIP_DEFLATED) as f:
+            f.write(FILE_OUTPUT)
+
     print("Done.")
 
 
