@@ -57,12 +57,13 @@ def main():
     db_uri = get_sql_uri_from_cnf(FILE_SQL_CONFIG)
     print("Reading taxa table from database...")
     taxa_export_df = pd.read_sql(SQL_EXPORT_TBL, db_uri)
+    print("Found {} unique taxa".format(len(taxa_export_df)))
     print(taxa_export_df.head())
     print("Exporting taxa table to csv...")
 
-    memfile = io.StringIO()
+    mem_file = io.StringIO()
     taxa_export_df.to_csv(
-        memfile,
+        mem_file,
         columns=DTYPES_TAXA.keys(),
         index=False,
         quoting=csv.QUOTE_NONNUMERIC
@@ -70,13 +71,16 @@ def main():
 
     if zip_output:
         print("Zipping output...")
-        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED.format(date_today), 'w', compression=zipfile.ZIP_DEFLATED) as zf:
-            zf.writestr(FILE_OUTPUT.format(date_today), memfile.getvalue())
+        output_file = FILE_OUTPUT_ZIPPED.format(date_today)
+        with zipfile.ZipFile(output_file, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(FILE_OUTPUT.format(date_today), mem_file.getvalue())
     else:
         print("Writing output...")
-        with open(FILE_OUTPUT.format(date_today), "w") as f:
-            f.write(memfile.getvalue())
+        output_file = FILE_OUTPUT.format(date_today)
+        with open(output_file, "w") as f:
+            f.write(mem_file.getvalue())
 
+    print("Output {} is {:.1f} MB".format(output_file, os.path.getsize(output_file) / 1024**2))
     print("Done.")
 
 
