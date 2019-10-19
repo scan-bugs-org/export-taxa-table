@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import configparser
 import csv
+import io
 import numpy as np
 import os
 import pandas as pd
@@ -8,10 +11,13 @@ from datetime import date
 
 
 SQL_EXPORT_TBL = """
-SELECT t.tid as tid, te.parenttid as parenttid, u.rankname as rankname, t.sciname as sciname, t.author as author
+SELECT t.tid as tid, max(te.parenttid) as parenttid, u.rankname as rankname, t.sciname as sciname, t.author as author
 FROM taxa t 
 INNER JOIN taxaenumtree te on t.tid = te.tid 
 INNER JOIN taxonunits u on t.rankid = u.rankid 
+WHERE t.tid != te.parenttid
+OR t.tid = 1
+GROUP BY t.tid
 ORDER BY t.tid;
 """
 
@@ -46,15 +52,17 @@ def get_sql_uri_from_cnf(my_cnf_file):
 
 
 def main():
-    zip_output = False
+    zip_output = True
     date_today = date.today().strftime("%Y-%m-%d")
     db_uri = get_sql_uri_from_cnf(FILE_SQL_CONFIG)
     print("Reading taxa table from database...")
     taxa_export_df = pd.read_sql(SQL_EXPORT_TBL, db_uri)
     print(taxa_export_df.head())
     print("Exporting taxa table to csv...")
+
+    memfile = io.StringIO()
     taxa_export_df.to_csv(
-        FILE_OUTPUT.format(date_today),
+        memfile,
         columns=DTYPES_TAXA.keys(),
         index=False,
         quoting=csv.QUOTE_NONNUMERIC
@@ -62,9 +70,12 @@ def main():
 
     if zip_output:
         print("Zipping output...")
-        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED.format(date_today), 'w', compression=zipfile.ZIP_DEFLATED) as f:
-            f.write(FILE_OUTPUT.format(date_today))
-        os.remove(FILE_OUTPUT.format(date_today))
+        with zipfile.ZipFile(FILE_OUTPUT_ZIPPED.format(date_today), 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(FILE_OUTPUT.format(date_today), memfile.getvalue())
+    else:
+        print("Writing output...")
+        with open(FILE_OUTPUT.format(date_today), "w") as f:
+            f.write(memfile.getvalue())
 
     print("Done.")
 
